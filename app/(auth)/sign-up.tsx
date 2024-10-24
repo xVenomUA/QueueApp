@@ -1,10 +1,12 @@
-import { Image, ScrollView, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import { Alert, Image, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '@/components/FormField/FormField';
 import CustBTN from '@/components/Button/CustBNT';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import icons from '@/constants/icons';
+import { dispatch } from '@/redux/store';
+import { SignUpAPI } from '@/redux/auth/operation';
 
 interface FormProps {
   email: string;
@@ -14,7 +16,26 @@ interface FormProps {
 
 const SignUp = () => {
   const [form, setForm] = useState<FormProps>({ email: '', password: '', username: '' });
-
+  const [data, setData] = useState<any>(null);
+  const handleOnSubmit = () => {
+    const data = {
+      email: form.email,
+      password: form.password,
+      username: form.username,
+    };
+    dispatch(SignUpAPI(data))
+      .unwrap()
+      .then(() => {
+        router.replace('/home');
+      })
+      .catch(e => {
+        if (e.status === 409) {
+          Alert.alert('Помилка', 'Користувач з такою поштою вже існує');
+          return;
+        }
+        Alert.alert('Помилка', 'Не вдалося зареєструватися');
+      });
+  };
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -50,7 +71,11 @@ const SignUp = () => {
             password={true}
           />
 
-          <CustBTN title="Зареєструватися" handlePress={() => {}} containerStyle="mt-7 w-full" />
+          <CustBTN
+            title="Зареєструватися"
+            handlePress={handleOnSubmit}
+            containerStyle="mt-7 w-full"
+          />
           <Text className="text-sm mt-6 w-full text-center text-gray-100 font-pregular text-[16px]">
             Вже маєте обліковий запис?{' '}
             <Link href={'/sign-in'} className="text-secondary font-psemibold text-[16px]">

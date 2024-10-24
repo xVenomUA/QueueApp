@@ -5,30 +5,56 @@ import icons from '@/constants/icons';
 import { router, useRouter } from 'expo-router';
 import images from '@/constants/images';
 import FormField from '@/components/FormField/FormField';
-
+import { useSelector } from 'react-redux';
+import { logout, selectUser } from '@/redux/auth/AuthSlice';
+import { dispatch } from '@/redux/store';
+import { patchUserAPi } from '@/redux/auth/operation';
+interface ProfileProps {
+  username: string;
+  email: string;
+  password?: string;
+  id: string | number;
+}
 const Profile = () => {
-  const navigation = useRouter();
-
+  const data = useSelector(selectUser);
   const [modalVisible, setModalVisible] = useState(false);
-  const [profile, setProfile] = useState({
-    name: 'Андріан Погребняк',
-    email: 'andrian@example.com',
-    password: '',
+  const [newProfile, setNewProfile] = useState<ProfileProps>({
+    username: data?.username || '',
+    email: data?.email || '',
+    password: data?.password || '',
+    id: data?.id || '',
   });
-
-  const [newProfile, setNewProfile] = useState({ ...profile });
 
   const handleLogout = () => {
     Alert.alert('Підтвердження', 'Ви впевнені, що хочете вийти?', [
       { text: 'Скасувати', style: 'cancel' },
-      { text: 'Вийти', onPress: () => router.replace('/sign-in') },
+      {
+        text: 'Вийти',
+        onPress: () => {
+          dispatch(logout({}));
+          router.replace('/sign-in');
+        },
+      },
     ]);
   };
 
   const handleSaveChanges = () => {
-    setProfile(newProfile);
+    const data: { username: string; email: string; password?: string } = {
+      username: newProfile.username || '',
+      email: newProfile.email || '',
+    };
+    if (newProfile.password) {
+      data.password = newProfile.password;
+    }
     setModalVisible(false);
-    Alert.alert('Успіх', 'Профіль успішно оновлено!');
+    dispatch(patchUserAPi(data))
+      .unwrap()
+      .then(() => {
+        Alert.alert('Успіх', 'Профіль успішно оновлено!');
+      })
+      .catch(e => {
+        Alert.alert('Помилка', 'Попробуйте ще раз');
+      });
   };
 
   return (
@@ -47,19 +73,8 @@ const Profile = () => {
                 resizeMode="cover"
               />
             </View>
-            <Text className="text-white text-4xl font-psemibold my-5">{profile.name}</Text>
-            <Text className="text-[#A0A0A0] text-md mb-2">{profile.email}</Text>
-          </View>
-
-          <View className="flex-row gap-7 justify-center items-center my-5">
-            <View className="gap-1 justify-center items-center">
-              <Text className="text-white font-psemibold text-xl">5</Text>
-              <Text className="text-[#CDCDE0] font-pregular text-md">Активні черги</Text>
-            </View>
-            <View className="gap-1 justify-center items-center">
-              <Text className="text-white font-psemibold text-xl">12</Text>
-              <Text className="text-[#CDCDE0] font-pregular text-md">Завершені черги</Text>
-            </View>
+            <Text className="text-white text-4xl font-psemibold my-5">{data?.username}</Text>
+            <Text className="text-[#A0A0A0] text-md mb-2">{data?.email}</Text>
           </View>
 
           <View className="my-5 p-4 bg-gray-800 rounded-lg">
@@ -69,7 +84,6 @@ const Profile = () => {
           </View>
         </View>
       </ScrollView>
-
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="w-[90%] bg-[#164b49]  p-6 rounded-lg">
@@ -77,15 +91,15 @@ const Profile = () => {
 
             <FormField
               title="Ім'я"
-              value={newProfile.name}
+              value={newProfile?.username}
               otherStyle="mb-4"
               placeholder="Введіть ім'я"
-              handleChangeText={(text: string) => setNewProfile({ ...newProfile, name: text })}
+              handleChangeText={(text: string) => setNewProfile({ ...newProfile, username: text })}
             />
 
             <FormField
               title="Електронна пошта"
-              value={newProfile.email}
+              value={newProfile?.email}
               otherStyle="mb-4"
               keyBoardType="email-address"
               placeholder="example@gmail.com"
@@ -94,7 +108,7 @@ const Profile = () => {
 
             <FormField
               title="Новий пароль"
-              value={newProfile.password}
+              value={newProfile.password || ''}
               otherStyle="mb-4"
               keyBoardType="default"
               placeholder="Введіть новий пароль"

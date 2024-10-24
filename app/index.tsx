@@ -1,13 +1,46 @@
-import { Image, ScrollView, StatusBar, Text, View } from 'react-native';
-import React from 'react';
+import { Image, ScrollView, StatusBar, Text, View, ActivityIndicator } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustBTN from '@/components/Button/CustBNT';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import images from '@/constants/images';
 
 export default function QueueEase() {
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useLayoutEffect(() => {
+    const checkTokenAndRedirect = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+
+        if (token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          router.replace('/home');
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error checking token:', error);
+        setLoading(false);
+      }
+    };
+
+    checkTokenAndRedirect();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#FFA001" />
+      </View>
+    );
+  }
+
   const handlePress = () => {
-    router.push('/profile');
+    router.push('/sign-in');
   };
 
   return (

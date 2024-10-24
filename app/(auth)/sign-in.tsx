@@ -1,11 +1,13 @@
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, Text, View } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import images from '../../constants/images'; // Додайте нове зображення логотипу тут
 import FormField from '@/components/FormField/FormField';
 import CustBTN from '@/components/Button/CustBNT';
 import { Link, router } from 'expo-router';
 import icons from '@/constants/icons';
+
+import { SignInAPI } from '@/redux/auth/operation';
+import { dispatch } from '@/redux/store';
 
 interface FormProps {
   email: string;
@@ -16,12 +18,15 @@ const SignIn = () => {
   const [form, setForm] = useState<FormProps>({ email: '', password: '' });
 
   const handlePress = () => {
-    if (form.email === 'admin' || form.password === '1111') {
-      router.replace('/home');
-    } else {
-      setForm({ email: '', password: '' });
-      alert('Неправильні дані для входу');
-    }
+    dispatch(SignInAPI({ email: form.email, password: form.password }))
+      .unwrap()
+      .then(() => {
+        router.replace('/home');
+      })
+      .catch(e => {
+        Alert.alert('Помилка', 'Невірний логін або пароль');
+      });
+    setForm({ email: '', password: '' });
   };
 
   return (
@@ -34,7 +39,6 @@ const SignIn = () => {
             resizeMode="contain"
           />
           <Text className="text-3xl text-white mt-5 font-psemibold">Увійдіть у Живу Чергу</Text>
-
           <FormField
             title="Електронна пошта"
             value={form.email}

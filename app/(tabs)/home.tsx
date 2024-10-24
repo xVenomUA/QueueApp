@@ -1,40 +1,37 @@
-import { Image, ScrollView, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import { Image, ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import images from '@/constants/images';
-import FormField from '@/components/FormField/FormField';
-import Slider from '@/components/Slider/Slider';
-import TrendingList from '@/components/TrendingCard/TrendingList';
-import { dataOfTrendingsCard } from '../helpers/MockData';
+import { useSelector } from 'react-redux';
+import { selectQueue } from '@/redux/Queue/QueueSlice';
+import { GetQueueAPI } from '@/redux/Queue/operation';
+import { dispatch } from '@/redux/store';
+import QueueCard from '@/components/QueueCard';
+import { router } from 'expo-router';
 
-const home = () => {
-  const [value, setvalue] = useState<string>('');
+const QueuePage = () => {
+  const data = useSelector(selectQueue);
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="justify-start w-full min-h-[80vh] px-4 py-[30px]">
-          <View className="flex-row items-center justify-between w-full h-[50px]">
-            <View className="flex-col">
-              <Text className='text-[#CDCDE0] font-pregular text-[14px]'>Welcome Back</Text>
-              <Text className='text-2xl text-white font-psemibold'>jsmasteru</Text>
-            </View>
-            <Image source={images.logoSmall} className="w-[35px] h-35px]" resizeMode="contain" />
+          <View className="flex-row justify-between">
+            <Text className="text-white text-3xl font-bold mb-6">Моя черга</Text>
+            <TouchableOpacity onPress={() => dispatch(GetQueueAPI())}>
+              <View className="p-1 bg-secondary w-[150px] rounded-xl items-center justify-center">
+                <Text className="text-white font-psemibold text-xl">Оновити</Text>
+              </View>
+            </TouchableOpacity>
           </View>
-          <FormField
-            search={true}
-            placeholder="Search for a video topic"
-            value={value}
-            handleChangeText={(e: string) => {
-              setvalue(e);
-            }}
-          />
-          <Text className='my-[20px] font-pregular text-[#CDCDE0] text-sm'>Trending Videos</Text>
-          <Slider /> 
-          <TrendingList data={dataOfTrendingsCard} />
+
+          {data?.map((queue, index) => (
+            <View key={`index+${queue.id}`}>
+              <QueueCard data={queue} />
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default home;
+export default QueuePage;

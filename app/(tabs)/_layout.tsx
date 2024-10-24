@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { Image, StatusBar, Text, View } from 'react-native';
+import { Image, StatusBar, Text, View, ActivityIndicator } from 'react-native';
 import icons from '../../constants/icons';
+import PrivateRoute from '@/components/PrivateRoute/PrivateRouter'; 
 
 interface TabBarIconProps {
   icon: any;
@@ -26,63 +27,55 @@ const TabBarIcon = ({ icon, color, focused, name }: TabBarIconProps) => {
 
 const TabsLayout = () => {
   return (
-    <>
-      <Tabs
-        screenOptions={{
-          tabBarShowLabel: false,
-          tabBarActiveTintColor: '#FFA001',
-          tabBarInactiveTintColor: '#CDCDE0',
-          tabBarStyle: {
-            backgroundColor: '#161622',
-            borderTopWidth: 1,
-            borderTopColor: '#232533',
-            height: 64,
-          },
-        }}
-      >
-        <Tabs.Screen
-          name="home"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ focused, color }) => (
-              <TabBarIcon focused={focused} name="Home" color={color} icon={icons.home} />
-            ),
-            headerShown: false,
+    <PrivateRoute>
+      <>
+        <Tabs
+          screenOptions={{
+            tabBarShowLabel: false,
+            tabBarActiveTintColor: '#FFA001',
+            tabBarInactiveTintColor: '#CDCDE0',
+            tabBarStyle: {
+              backgroundColor: '#161622',
+              borderTopWidth: 1,
+              borderTopColor: '#232533',
+              height: 64,
+            },
           }}
-        />
-        <Tabs.Screen
-          name="create"
-          options={{
-            title: 'Create',
-            tabBarIcon: ({ focused, color }) => (
-              <TabBarIcon focused={focused} name="Create" color={color} icon={icons.plus} />
-            ),
-            headerShown: false,
-          }}
-        />
-        <Tabs.Screen
-          name="bookmark"
-          options={{
-            title: 'Saved',
-            tabBarIcon: ({ focused, color }) => (
-              <TabBarIcon focused={focused} name="Saved" color={color} icon={icons.bookmark} />
-            ),
-            headerShown: false,
-          }}
-        />
-         <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'profile',
-            tabBarIcon: ({ focused, color }) => (
-              <TabBarIcon focused={focused} name="profile" color={color} icon={icons.profile} />
-            ),
-            headerShown: false,
-          }}
-        />
-      </Tabs>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#161622'} />  
-    </>
+        >
+          <Tabs.Screen
+            name="home"
+            options={{
+              title: 'Черга',
+              tabBarIcon: ({ focused, color }) => (
+                <TabBarIcon focused={focused} name="Головна" color={color} icon={icons.home} />
+              ),
+              headerShown: false,
+            }}
+          />
+          <Tabs.Screen
+            name="create"
+            options={{
+              title: 'Create',
+              tabBarIcon: ({ focused, color }) => (
+                <TabBarIcon focused={focused} name="Створити" color={color} icon={icons.plus} />
+              ),
+              headerShown: false,
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: 'Профіль',
+              tabBarIcon: ({ focused, color }) => (
+                <TabBarIcon focused={focused} name="Профіль" color={color} icon={icons.profile} />
+              ),
+              headerShown: false,
+            }}
+          />
+        </Tabs>
+        <StatusBar barStyle="light-content" backgroundColor="#161622" />
+      </>
+    </PrivateRoute>
   );
 };
 
